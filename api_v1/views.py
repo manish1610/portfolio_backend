@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import requests
 from rest_framework import serializers
+from django.conf import settings
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -26,8 +27,9 @@ class AddComment(APIView):
 
 class GithubProjects(APIView):
     def get(self, request, format=None):
-        github_username = "your_github_username"
-        github_token = "your_github_token"
+        github_username = settings.GITHUB_USERNAME
+        github_token = settings.GITHUB_TOKEN
+
 
         url = f"https://api.github.com/users/{github_username}/repos"
         headers = {"Authorization": f"token {github_token}"}

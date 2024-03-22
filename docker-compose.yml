@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: portfolio_backend_db
+    environment:
+      POSTGRES_PASSWORD: portfolio_pwd
+      POSTGRES_USER: portfolio_user
+      POSTGRES_DB: portfolio_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - portfolio_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: "pg_isready -U attainuser -d attain"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: portfolio_backend_api
+    volumes:
+      - .:/app
+    command: bash -c "python manage.py migrate && python ./manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PYTHONUNBUFFERED: 1
+      SECRET_KEY: 'Wu7MJeDm87rCvMETqdlKww'
+      DATABASE_ENGINE: django.db.backends.postgresql
+      DATABASE_NAME: portfolio_db
+      DATABASE_USER: portfolio_user
+      DATABASE_PASSWORD: portfolio_pwd
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+
+    env_file:
+      - docker.env
+
+volumes:
+  portfolio_postgres_data:
