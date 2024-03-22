@@ -3,17 +3,20 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import requests
+from rest_framework import serializers
 
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['id', 'name', 'comment', 'created_at']
+        fields = ['id', 'added_by', 'description']
 
 
 class AddComment(APIView):
     def post(self, request, format=None):
+        print("before")
         serializer = CommentSerializer(data=request.data)
+        print("here")
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -21,7 +24,7 @@ class AddComment(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LatestProjects(APIView):
+class LatestGithubProjects(APIView):
     def get(self, request, format=None):
         github_username = "your_github_username"
         github_token = "your_github_token"
