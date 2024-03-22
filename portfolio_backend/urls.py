@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from api_v1.views import AddComment, LatestGithubProjects
+from api_v1.views import AddComment, GithubProjects
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('latest-github-projects/', LatestGithubProjects.as_view(), name='latest-github-projects'),
+    path('github-projects/', GithubProjects.as_view(), name='github-projects'),
     path('add-comment/', AddComment.as_view(), name='add-comment'),
 ]

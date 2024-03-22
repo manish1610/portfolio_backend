@@ -24,7 +24,7 @@ class AddComment(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LatestGithubProjects(APIView):
+class GithubProjects(APIView):
     def get(self, request, format=None):
         github_username = "your_github_username"
         github_token = "your_github_token"
@@ -32,14 +32,22 @@ class LatestGithubProjects(APIView):
         url = f"https://api.github.com/users/{github_username}/repos"
         headers = {"Authorization": f"token {github_token}"}
         response = requests.get(url, headers=headers)
+        n_latest = request.query_params.get('n_latest', None)
 
         if not response.status_code == status.HTTP_200_OK:
             return Response({"error": "Failed to fetch data from GitHub"}, status=response.status_code)
 
         github_repos = response.json()
         projects = [
-            {"name": repo["name"], "created_at": repo["created_at"]}
+            {
+                field: repo[field]
+                for field in ['name', 'created_at', 'updated_at', 'url', 'description', 'html_url']
+            }
             for repo in github_repos
         ]
 
-        return Response(projects, status.HTTP_200_OK)
+        sorted_projects = sorted(projects, key=lambda project: project['updated_at'], reverse=True)
+        if n_latest:
+            sorted_projects = sorted_projects[:int(n_latest)]
+
+        return Response(sorted_projects, status.HTTP_200_OK)
